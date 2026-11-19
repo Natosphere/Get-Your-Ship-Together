@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shipwright — Boat Customizer</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg:#0b1420; --panel:#142335; --panel2:#1a2d42; --line:#2b425a;
+  --text:#edf4fb; --muted:#a7bacd; --accent:#65d4c4; --gold:#f0c779;
+  --danger:#ff8c8c; --shadow:0 18px 45px #0005;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% -20%,#25445b 0%,transparent 55%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+button,select{font:inherit}
+header{max-width:1200px;margin:auto;padding:34px 24px 20px;display:flex;justify-content:space-between;align-items:end;gap:20px}
+.eyebrow{color:var(--accent);font-size:.75rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+h1{font-family:Georgia,serif;font-size:clamp(2rem,5vw,3.4rem);line-height:1.05;margin:7px 0}
+header p{margin:8px 0 0;color:var(--muted)}
+.header-tag{border:1px solid var(--line);border-radius:999px;padding:8px 13px;color:var(--gold);white-space:nowrap;font-size:.85rem}
+main{max-width:1200px;margin:auto;padding:0 24px 48px;display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.8fr);gap:22px;align-items:start}
+.section{background:linear-gradient(145deg,#172a3e,#112031);border:1px solid var(--line);border-radius:17px;padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.section-head{display:flex;justify-content:space-between;gap:12px;align-items:start;margin-bottom:15px}
+h2{font:600 1.3rem Georgia,serif;margin:0}
+.sub{color:var(--muted);font-size:.88rem;margin:4px 0 0}
+.pill{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;border-radius:99px;padding:5px 9px;background:#20394c;color:var(--accent);white-space:nowrap}
+.options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.option{display:block;position:relative;cursor:pointer}
+.option input{position:absolute;opacity:0;pointer-events:none}
+.option-card{height:100%;border:1px solid var(--line);border-radius:12px;padding:13px;background:#102033;transition:.15s}
+.option:hover .option-card{border-color:#6b9ab0;transform:translateY(-1px)}
+.option input:checked + .option-card{border-color:var(--accent);background:linear-gradient(145deg,#1c414a,#142d3d);box-shadow:inset 0 0 0 1px #65d4c455}
+.option input:focus-visible + .option-card{outline:2px solid var(--gold);outline-offset:3px}
+.option-top{display:flex;justify-content:space-between;gap:8px;align-items:start}
+.option-name{font-weight:700}
+.cost{color:var(--gold);font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+.desc{font-size:.83rem;color:var(--muted);margin-top:7px}
+.statsline{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.stat{font-size:.72rem;padding:3px 7px;border-radius:6px;background:#26394b;color:#dce9f3}
+aside{position:sticky;top:16px}
+.summary{background:linear-gradient(160deg,#1a3446,#122234);border:1px solid #426276;border-radius:18px;padding:21px;box-shadow:var(--shadow)}
+.summary h2{font-size:1.55rem}
+.points{display:flex;align-items:end;justify-content:space-between;margin:18px 0 8px}
+.points strong{font-size:2.4rem;line-height:1;font-variant-numeric:tabular-nums}
+.points span{color:var(--muted);font-size:.85rem}
+.progress{height:9px;border-radius:99px;background:#0a1723;overflow:hidden}
+.progress>div{height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .2s}
+.status{margin:10px 0 17px;font-size:.85rem;color:var(--accent)}
+.status.over{color:var(--danger)}
+.status.incomplete{color:var(--gold)}
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.stat-box{background:#102033;border:1px solid var(--line);border-radius:10px;padding:10px}
+.stat-box span{display:block;color:var(--muted);font-size:.75rem}
+.stat-box strong{font-size:1.25rem;font-variant-numeric:tabular-nums}
+.selection-list{border-top:1px solid var(--line);margin-top:18px;padding-top:14px}
+.selection-list h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 8px}
+.selection-row{display:flex;justify-content:space-between;gap:12px;font-size:.85rem;padding:5px 0}
+.selection-row span:last-child{color:var(--gold);white-space:nowrap}
+.actions{display:flex;gap:9px;margin-top:17px}
+button{border:1px solid var(--line);border-radius:9px;padding:9px 12px;color:var(--text);background:#20394c;cursor:pointer}
+button:hover{filter:brightness(1.15)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#09202a;font-weight:800;flex:1}
+.note{color:var(--muted);font-size:.78rem;margin-top:12px}
+footer{max-width:1200px;margin:auto;padding:0 24px 30px;color:#7f96aa;font-size:.78rem}
+@media(max-width:850px){main{grid-template-columns:1fr}aside{position:static;grid-row:1}.options{grid-template-columns:1fr 1fr}header{align-items:start;flex-direction:column}}
+@media(max-width:520px){main{padding:0 13px 30px}header{padding:25px 16px 16px}.options{grid-template-columns:1fr}.section{padding:16px}.header-tag{white-space:normal}}
+@media print{body{background:white;color:#111}.section,.summary{background:white;color:#111;box-shadow:none;border:1px solid #aaa;break-inside:avoid}.desc,.sub,.note,.stat-box span,footer{color:#444}.option-card,.stat-box{background:white;border-color:#aaa}.pill,.stat{background:#eee;color:#111}aside{position:static}main{display:block}.actions{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="eyebrow">Shipwright's workshop</div>
+    <h1>Boat Customizer</h1>
+    <p>Build your ship, balance its upgrades, and keep an eye on the point budget.</p>
+  </div>
+  <div class="header-tag">130 customization points</div>
+</header>
+<main>
+  <div id="choices">
+    <section class="section" data-section="right">
+      <div class="section-head"><div><h2>Right side</h2><p class="sub">Middle right of the ship · Choose one launcher</p></div><span class="pill">Required</span></div>
+      <div class="options">
+        <label class="option"><input type="radio" name="right" value="firebolt" checked><div class="option-card"><div class="option-top"><span class="option-name">Fire Bolt Launcher</span><span class="cost">10 pts</span></div><div class="desc">Casts Fire Bolt (1d8) at 250 ft. 1 action to load.</div><div class="statsline"><span class="stat">1 power</span><span class="stat">1 action</span><span class="stat">250 ft</span></div></div></label>
+        <label class="option"><input type="radio" name="right" value="missile"><div class="option-card"><div class="option-top"><span class="option-name">Magic Missile Launcher</span><span class="cost">20 pts</span></div><div class="desc">Casts Magic Missile (3d4) at 200 ft. Always hits. 1 action to load.</div><div class="statsline"><span class="stat">1 power</span><span class="stat">1 action</span><span class="stat">200 ft</span></div></div></label>
+        <label class="option"><input type="radio" name="right" value="scorching"><div class="option-card"><div class="option-top"><span class="option-name">Scorching Ray Launcher</span><span class="cost">40 pts</span></div><div class="desc">Casts Scorching Ray (6d6) at 300 ft. 2 actions to load.</div><div class="statsline"><span class="stat">2 power</span><span class="stat">2 actions</span><span class="stat">300 ft</span></div></div></label>
+        <label class="option"><input type="radio" name="right" value="fireball"><div class="option-top"><span class="option-name">Fireball Launcher</span><span class="cost">50 pts</span></div><div class="desc">Casts Fireball (8d6) at 300 ft. 3 actions to load.</div><div class="statsline"><span class="stat">4 power</span><span class="stat">3 actions</span><span class="stat">300 ft</span></div></div></label>
+      </div>
+    </section>
+
+    <section class="section" data-section="left">
+      <div class="section-head"><div><h2>Left side</h2><p class="sub">Middle left of the ship · Choose one launcher</p></div><span class="pill">Required</span></div>
+      <div class="options">
+        <label class="option"><input type="radio" name="left" value="firebolt" checked><div class="option-card"><div class="option-top"><span class="option-name">Fire Bolt Launcher</span><span class="cost">10 pts</span></div><div class="desc">Casts Fire Bolt (1d8) at 250 ft. 1 action to load.</div><div class="statsline"><span class="stat">1 power</span><span class="stat">1 action</span><span class="stat">250 ft</span></div></div></label>
+        <label class="option"><input type="radio" name="left" value="missile"><div class="option-card"><div class="option-top"><span class="option-name">Magic Missile Launcher</span><span class="cost">20 pts</span></div><div class="desc">Casts Magic Missile (3d4) at 200 ft. Always hits. 1 action to load.</div><div class="statsline"><span class="stat">1 power</span><span class="stat">1 action</span><span class="stat">200 ft</span></div></div></label>
+        <label class="option"><input type="radio" name="left" value="scorching"><div class="option-card"><div class="option-top"><span class="option-name">Scorching Ray Launcher</span><span class="cost">40 pts</span></div><div class="desc">Casts Scorching Ray (6d6) at 300 ft. 2 actions to load.</div><div class="statsline"><span class="stat">2 power</span><span class="stat">2 actions</span><span class="stat">300 ft</span></div></div></label>
+        <label class="option"><input type="radio" name="left" value="fireball"><div class="option-card"><div class="option-top"><span class="option-name">Fireball Launcher</span><span class="cost">50 pts</span></div><div class="desc">Casts Fireball (8d6) at 300 ft. 3 actions to load.</div><div class="statsline"><span class="stat">4 power</span><span class="stat">3 actions</span><span class="stat">300 ft</span></div></div></label>
+      </div>
+    </section>
+
+    <section class="section" data-section="front">
+      <div class="section-head"><div><h2>Front</h2><p class="sub">Projectile interception · Choose one defense</p></div><span class="pill">Required</span></div>
+      <div class="options">
+        <label class="option"><input type="radio" name="front" value="sniping" checked><div class="option-card"><div class="option-top"><span class="option-name">Sniping Shield</span><span class="cost">10 pts</span></div><div class="desc">Launches rocks to intercept incoming projectiles. 1 action to prepare.</div><div class="statsline"><span class="stat">1d4 reduction</span><span class="stat">1 action</span></div></div></label>
+        <label class="option"><input type="radio" name="front" value="net"><div class="option-card"><div class="option-top"><span class="option-name">Net Launch</span><span class="cost">20 pts</span></div><div class="desc">Throws nets to capture a wider array of projectiles. 1 action to prepare.</div><div class="statsline"><span class="stat">1d6 reduction</span><span class="stat">1 action</span></div></div></label>
+        <label class="option"><input type="radio" name="front" value="daggers"><div class="option-card"><div class="option-top"><span class="option-name">Cloud of Daggers</span><span class="cost">30 pts</span></div><div class="desc">Launches a cloud of daggers, highly effective at intercepting projectiles. 2 actions to prepare.</div><div class="statsline"><span class="stat">2d6 reduction</span><span class="stat">2 actions</span></div></div></label>
+        <label class="option"><input type="radio" name="front" value="familiar"><div class="option-card"><div class="option-top"><span class="option-name">Familiar Storm</span><span class="cost">40 pts</span></div><div class="desc">Unleashes magical familiars to seek out and hug incoming projectiles. 2 actions to prepare.</div><div class="statsline"><span class="stat">3d6 reduction</span><span class="stat">2 actions</span></div></div></label>
+      </div>
+    </section>
+
+    <section class="section" data-section="back">
+      <div class="section-head"><div><h2>Back & interior</h2><p class="sub">Utility systems · Choose one feature</p></div><span class="pill">Required</span></div>
+      <div class="options">
+        <label class="option"><input type="radio" name="back" value="storage" checked><div class="option-card"><div class="option-top"><span class="option-name">Storage</span><span class="cost">10 pts</span></div><div class="desc">Magically generates material to launch a weapon one additional time per turn.</div></div></label>
+        <label class="option"><input type="radio" name="back" value="kitchen"><div class="option-card"><div class="option-top"><span class="option-name">Kitchen</span><span class="cost">20 pts</span></div><div class="desc">Cooks food to give one crew member advantage once per turn.</div></div></label>
+        <label class="option"><input type="radio" name="back" value="potion"><div class="option-card"><div class="option-top"><span class="option-name">Potion Station</span><span class="cost">30 pts</span></div><div class="desc">Brews potions to drop behind the ship: freezing, darkness, grease, or bait.</div></div></label>
+        <label class="option"><input type="radio" name="back" value="craft"><div class="option-card"><div class="option-top"><span class="option-name">Craft Station</span><span class="cost">40 pts</span></div><div class="desc">Repairs the ship for 1d4 HP per use. Once per combat, can prevent ship death and restore it to 5 HP.</div></div></label>
+      </div>
+    </section>
+
+    <section class="section" data-section="plating">
+      <div class="section-head"><div><h2>Plating & defense</h2><p class="sub">Hull material changes the ship's core stats</p></div><span class="pill">Optional · Recommended</span></div>
+      <div class="options">
+        <label class="option"><input type="radio" name="plating" value="none" checked><div class="option-card"><div class="option-top"><span class="option-name">Base hull</span><span class="cost">0 pts</span></div><div class="desc">No special plating. Base ship stats apply.</div><div class="statsline"><span class="stat">AC 10</span><span class="stat">50 HP</span><span class="stat">100 speed</span></div></div></label>
+        <label class="option"><input type="radio" name="plating" value="ice"><div class="option-card"><div class="option-top"><span class="option-name">Enchanted Ice</span><span class="cost">10 pts</span></div><div class="desc">Fast, fragile hull.</div><div class="statsline"><span class="stat">AC 8</span><span class="stat">30 HP</span><span class="stat">300 speed</span><span class="stat">0 magic def.</span></div></div></label>
+        <label class="option"><input type="radio" name="plating" value="wood"><div class="option-card"><div class="option-top"><span class="option-name">Enchanted Wood</span><span class="cost">20 pts</span></div><div class="desc">Balanced protection and durability.</div><div class="statsline"><span class="stat">AC 13</span><span class="stat">50 HP</span><span class="stat">100 speed</span><span class="stat">1 magic def.</span></div></div></label>
+        <label class="option"><input type="radio" name="plating" value="metal"><div class="option-card"><div class="option-top"><span class="option-name">Enchanted Metal</span><span class="cost">40 pts</span></div><div class="desc">Heavy armor and strong durability.</div><div class="statsline"><span class="stat">AC 17</span><span class="stat">80 HP</span><span class="stat">50 speed</span><span class="stat">2 magic def.</span></div></div></label>
+        <label class="option"><input type="radio" name="plating" value="living"><div class="option-card"><div class="option-top"><span class="option-name">Enchanted Living Wood</span><span class="cost">50 pts</span></div><div class="desc">Regenerating hull with high magical resistance.</div><div class="statsline"><span class="stat">AC 15</span><span class="stat">55 HP</span><span class="stat">100 speed</span><span class="stat">4 magic def.</span><span class="stat">+4 HP/round</span></div></div></label>
+      </div>
+    </section>
+  </div>
+
+  <aside>
+    <section class="summary">
+      <div class="eyebrow">Current build</div>
+      <h2>Your ship at a glance</h2>
+      <div class="points"><div><strong id="spent">40</strong><span> / 130 points used</span></div><span id="remaining">90 left</span></div>
+      <div class="progress"><div id="progress"></div></div>
+      <div class="status" id="status" aria-live="polite">Within budget · All required sections selected</div>
+      <div class="stat-grid">
+        <div class="stat-box"><span>Hull points</span><strong id="hp">50</strong></div>
+        <div class="stat-box"><span>Armor class</span><strong id="ac">10</strong></div>
+        <div class="stat-box"><span>Speed</span><strong id="speed">100</strong></div>
+        <div class="stat-box"><span>Magic defense</span><strong id="magic">0</strong></div>
+      </div>
+      <div class="stat-box" id="regen-box" style="margin-top:9px;display:none"><span>Hull regeneration</span><strong>4 HP / round</strong></div>
+      <div class="selection-list"><h3>Selected customizations</h3><div id="selected"></div></div>
+      <div class="actions"><button class="primary" id="print">Print build</button><button id="reset">Reset</button></div>
+      <p class="note">Selections are calculated locally in this page. Print your build or save this HTML file to keep it.</p>
+    </section>
+  </aside>
+</main>
+<footer>Based on the supplied Boat Customization Information. Point costs and listed abilities are shown as provided in the handout.</footer>
+<script>
+const data = {
+  right:{firebolt:["Fire Bolt Launcher",10],missile:["Magic Missile Launcher",20],scorching:["Scorching Ray Launcher",40],fireball:["Fireball Launcher",50]},
+  left:{firebolt:["Fire Bolt Launcher",10],missile:["Magic Missile Launcher",20],scorching:["Scorching Ray Launcher",40],fireball:["Fireball Launcher",50]},
+  front:{sniping:["Sniping Shield",10],net:["Net Launch",20],daggers:["Cloud of Daggers",30],familiar:["Familiar Storm",40]},
+  back:{storage:["Storage",10],kitchen:["Kitchen",20],potion:["Potion Station",30],craft:["Craft Station",40]},
+  plating:{none:["Base hull",0],ice:["Enchanted Ice",10],wood:["Enchanted Wood",20],metal:["Enchanted Metal",40],living:["Enchanted Living Wood",50]}
+};
+const hulls = {
+  none:{hp:50,ac:10,speed:100,magic:0,regen:0},
+  ice:{hp:30,ac:8,speed:300,magic:0,regen:0},
+  wood:{hp:50,ac:13,speed:100,magic:1,regen:0},
+  metal:{hp:80,ac:17,speed:50,magic:2,regen:0},
+  living:{hp:55,ac:15,speed:100,magic:4,regen:4}
+};
+const labels={right:"Right side",left:"Left side",front:"Front",back:"Back & interior",plating:"Plating"};
+const selected = key => document.querySelector(`input[name="${key}"]:checked`)?.value;
+function update(){
+  let total=0, rows=[];
+  for(const section of Object.keys(data)){
+    const value=selected(section);
+    if(value && data[section][value]){
+      const [name,cost]=data[section][value]; total+=cost;
+      if(value!=="none") rows.push([labels[section],name,cost]);
+    }
+  }
+  const remaining=130-total, hull=hulls[selected("plating")]||hulls.none;
+  document.getElementById("spent").textContent=total;
+  document.getElementById("remaining").textContent=remaining>=0?`${remaining} left`:`${Math.abs(remaining)} over`;
+  document.getElementById("progress").style.width=`${Math.min(total/130*100,100)}%`;
+  document.getElementById("progress").style.background=remaining<0?"var(--danger)":"var(--accent)";
+  document.getElementById("hp").textContent=hull.hp;
+  document.getElementById("ac").textContent=hull.ac;
+  document.getElementById("speed").textContent=hull.speed;
+  document.getElementById("magic").textContent=hull.magic;
+  document.getElementById("regen-box").style.display=hull.regen?"block":"none";
+  const missing=["right","left","front","back"].filter(k=>!selected(k));
+  const status=document.getElementById("status");
+  status.className="status"+(remaining<0?" over":missing.length?" incomplete":"");
+  status.textContent=remaining<0?`Over budget by ${-remaining} points`:missing.length?`Choose an option for: ${missing.map(k=>labels[k]).join(", ")}`:"Within budget · All required sections selected";
+  document.getElementById("selected").innerHTML=rows.length?rows.map(([s,n,c])=>`<div class="selection-row"><span>${s}: ${n}</span><span>${c} pts</span></div>`).join(""):'<span class="note">No customizations selected.</span>';
+}
+document.querySelectorAll('input[type="radio"]').forEach(el=>el.addEventListener("change",update));
+document.getElementById("reset").addEventListener("click",()=>{
+  for(const [section,value] of Object.entries({right:"firebolt",left:"firebolt",front:"sniping",back:"storage",plating:"none"})){
+    document.querySelector(`input[name="${section}"][value="${value}"]`).checked=true;
+  }
+  update();
+});
+document.getElementById("print").addEventListener("click",()=>window.print());
+update();
+</script>
+</body>
+</html>
